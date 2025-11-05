@@ -40,13 +40,4 @@ jobs:
         RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
         SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
         SMTP_PORT: ${{ secrets.SMTP_PORT }}
-        
-    - name: 💾 Guardar datos actualizados
-      uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: pasantias-data
-        path: |
-          data/
-          logs/
-        retention-days: 30
+        GITHUB_ACTIONS: true
