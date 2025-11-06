@@ -57,47 +57,59 @@ class PasantiasWebScraper:
         offers = []
         
         try:
-            # Find all offer sections - they typically have "Búsqueda Nº" pattern
-            # Look for divs or sections containing offer information
+            # New approach: Find offer sections by looking for specific HTML structure
+            # Each offer is in a section with h2 containing the area name, followed by búsqueda info
             
-            # First, let's find the main content area
-            content = soup.find('div', class_='content') or soup.find('main') or soup
+            html_text = str(soup)
             
-            # Look for offer patterns - typically contains "Búsqueda Nº" followed by number
-            text_content = content.get_text()
+            # Find all h2 elements that contain area names (excluding generic sections)
+            area_headers = soup.find_all('h2')
             
-            # Find all instances of "Búsqueda Nº" followed by numbers
-            busqueda_pattern = r'Búsqueda\s*Nº\s*(\d+)'
-            matches = list(re.finditer(busqueda_pattern, text_content, re.IGNORECASE))
+            # Filter to only actual offer areas (exclude navigation elements)
+            offer_sections = []
+            for h2 in area_headers:
+                area_text = h2.get_text().strip()
+                # Skip generic sections
+                if any(skip in area_text.lower() for skip in ['convocatorias vigentes', 'accesos directos', 'direcciones útiles', 'comunicación', 'additional links']):
+                    continue
+                    
+                # Look for "Búsqueda Nº" after this h2
+                h2_pos = html_text.find(str(h2))
+                if h2_pos != -1:
+                    # Look for búsqueda pattern within next 2000 characters
+                    section_text = html_text[h2_pos:h2_pos + 2000]
+                    busqueda_match = re.search(r'Búsqueda\s*Nº\s*(\d+)', section_text, re.IGNORECASE)
+                    if busqueda_match:
+                        offer_sections.append({
+                            'area': area_text,
+                            'h2_pos': h2_pos,
+                            'offer_number': busqueda_match.group(1),
+                            'match_pos': h2_pos + busqueda_match.start()
+                        })
             
-            # Also look for emails in the full page content
-            page_emails = self._extract_all_emails(soup)
+            logger.info(f"Found {len(offer_sections)} offer sections")
             
-            for i, match in enumerate(matches):
+            # Process each offer section
+            for i, section in enumerate(offer_sections):
                 try:
-                    # Extract offer number
-                    offer_number = match.group(1)
+                    # Define the boundaries for this offer
+                    start_pos = section['h2_pos']
+                    end_pos = offer_sections[i + 1]['h2_pos'] if i + 1 < len(offer_sections) else len(html_text)
                     
-                    # Find the start and end positions for this offer
-                    start_pos = match.start()
-                    end_pos = matches[i + 1].start() if i + 1 < len(matches) else len(text_content)
+                    # Extract the HTML section for this offer
+                    offer_html = html_text[start_pos:end_pos]
+                    offer_soup = BeautifulSoup(offer_html, 'html.parser')
+                    offer_text = offer_soup.get_text()
                     
-                    # Extract the text for this specific offer
-                    offer_text = text_content[start_pos:end_pos]
-                    
-                    # Extract details using regex patterns
-                    offer_data = self._extract_offer_details(offer_text, offer_number, soup)
-                    
-                    # Try to find email for this specific offer in the page
-                    if offer_data and not offer_data.get('contacto_email'):
-                        offer_data['contacto_email'] = self._find_offer_email(offer_number, soup, page_emails)
+                    # Extract details for this specific offer
+                    offer_data = self._extract_offer_details_new(offer_text, section['offer_number'], section['area'], offer_soup)
                     
                     if offer_data:
                         offers.append(offer_data)
-                        logger.info(f"Extracted offer #{offer_number}")
+                        logger.info(f"Extracted offer #{section['offer_number']} - {section['area']}")
                     
                 except Exception as e:
-                    logger.error(f"Error extracting offer {i}: {e}")
+                    logger.error(f"Error extracting offer section {i}: {e}")
                     continue
             
             logger.info(f"Total offers extracted: {len(offers)}")
@@ -108,7 +120,7 @@ class PasantiasWebScraper:
             return []
     
     def _extract_offer_details(self, offer_text: str, offer_number: str, soup: BeautifulSoup) -> Optional[Dict]:
-        """Extract detailed information from a single offer"""
+        """Extract detailed information from a single offer (legacy method)"""
         try:
             offer_data = {
                 'numero_busqueda': offer_number,
@@ -118,6 +130,33 @@ class PasantiasWebScraper:
                 'area': self._extract_area(offer_text, soup),
                 'contacto_email': None,  # Will be filled later with detailed page
                 'mas_informacion_url': self._find_mas_informacion_url(offer_number, soup),
+                'fecha_scraping': datetime.now().isoformat(),
+                'texto_completo': offer_text.strip()
+            }
+            
+            # Try to get additional details from the "MÁS INFORMACIÓN" link
+            if offer_data['mas_informacion_url']:
+                detailed_info = self._fetch_detailed_info(offer_data['mas_informacion_url'])
+                if detailed_info:
+                    offer_data.update(detailed_info)
+            
+            return offer_data
+            
+        except Exception as e:
+            logger.error(f"Error extracting details for offer {offer_number}: {e}")
+            return None
+    
+    def _extract_offer_details_new(self, offer_text: str, offer_number: str, area: str, offer_soup: BeautifulSoup) -> Optional[Dict]:
+        """Extract detailed information from a single offer (new improved method)"""
+        try:
+            offer_data = {
+                'numero_busqueda': offer_number,
+                'fecha_publicacion': self._extract_fecha_publicacion(offer_text),
+                'horario': self._extract_horario(offer_text),
+                'asignacion_estimulo': self._extract_asignacion(offer_text),
+                'area': area,  # Use the area directly from the h2 header
+                'contacto_email': None,  # Will be filled later with detailed page
+                'mas_informacion_url': self._find_mas_informacion_url_in_section(offer_number, offer_soup),
                 'fecha_scraping': datetime.now().isoformat(),
                 'texto_completo': offer_text.strip()
             }
@@ -166,11 +205,27 @@ class PasantiasWebScraper:
         return None
     
     def _find_mas_informacion_url(self, offer_number: str, soup: BeautifulSoup) -> Optional[str]:
-        """Find the 'MÁS INFORMACIÓN' URL for the specific offer"""
+        """Find the 'MÁS INFORMACIÓN' URL for the specific offer (legacy method)"""
         # Look for links containing "MÁS INFORMACIÓN" near the offer
         for link in soup.find_all('a', string=re.compile(r'MÁS\s*INFORMACIÓN', re.IGNORECASE)):
             href = link.get('href')
             if href and (offer_number in href or 'pasantias' in href):
+                # Convert relative URL to absolute
+                if href.startswith('/'):
+                    return f"https://www.derecho.uba.ar{href}"
+                elif href.startswith('http'):
+                    return href
+                else:
+                    # For relative URLs, add the base domain only
+                    return f"https://www.derecho.uba.ar/{href}"
+        return None
+    
+    def _find_mas_informacion_url_in_section(self, offer_number: str, section_soup: BeautifulSoup) -> Optional[str]:
+        """Find the 'MÁS INFORMACIÓN' URL within a specific offer section"""
+        # Look for links containing "MÁS INFORMACIÓN" in this specific section
+        for link in section_soup.find_all('a', string=re.compile(r'MÁS\s*INFORMACIÓN', re.IGNORECASE)):
+            href = link.get('href')
+            if href:
                 # Convert relative URL to absolute
                 if href.startswith('/'):
                     return f"https://www.derecho.uba.ar{href}"
