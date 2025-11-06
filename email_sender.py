@@ -123,92 +123,95 @@ class EmailSender:
             return "", ""
         
         # HTML Content
-        html_content = """
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <style>
-                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                .container { max-width: 800px; margin: 0 auto; padding: 20px; }
-                .header { background: #003366; color: white; padding: 20px; border-radius: 5px; text-align: center; }
-                .offer { background: #f9f9f9; border: 1px solid #ddd; margin: 20px 0; padding: 20px; border-radius: 5px; }
-                .offer-title { color: #003366; font-size: 18px; font-weight: bold; margin-bottom: 10px; }
-                .offer-detail { margin: 8px 0; }
-                .label { font-weight: bold; color: #666; }
-                .value { color: #333; }
-                .email-link { background: #007bff; color: white; padding: 8px 16px; text-decoration: none; border-radius: 3px; display: inline-block; margin-top: 10px; }
-                .footer { margin-top: 30px; padding: 20px; background: #f1f1f1; border-radius: 5px; font-size: 12px; color: #666; text-align: center; }
-                .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 15px 0; }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="header">
-                    <h1>🎓 Nueva Pasantía UBA Detectada</h1>
-                    <p>Facultad de Derecho - Universidad de Buenos Aires</p>
-                </div>
-        """
+        html_content = f"""<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nueva Pasantía UBA Disponible</title>
+    <style type="text/css">
+        body {{ font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f5f5f5; }}
+        .container {{ max-width: 700px; margin: 20px auto; background-color: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+        .header {{ background: linear-gradient(135deg, #003366, #004080); color: white; padding: 25px; border-radius: 8px 8px 0 0; text-align: center; }}
+        .header h1 {{ margin: 0; font-size: 24px; }}
+        .header p {{ margin: 8px 0 0 0; opacity: 0.9; }}
+        .content {{ padding: 25px; }}
+        .offer {{ background: #f8f9fa; border-left: 4px solid #003366; margin: 20px 0; padding: 20px; border-radius: 0 5px 5px 0; }}
+        .offer-title {{ color: #003366; font-size: 20px; font-weight: 600; margin-bottom: 15px; }}
+        .offer-detail {{ margin: 10px 0; font-size: 15px; }}
+        .label {{ font-weight: 600; color: #555; display: inline-block; min-width: 140px; }}
+        .value {{ color: #333; }}
+        .email-button {{ background: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 15px 0 5px 0; font-weight: 600; }}
+        .email-button:hover {{ background: #218838; }}
+        .footer {{ margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 5px; font-size: 13px; color: #666; text-align: center; border-top: 1px solid #dee2e6; }}
+        .info-box {{ background: #e8f4fd; border: 1px solid #b8daff; padding: 15px; border-radius: 5px; margin: 15px 0; }}
+        .university-link {{ color: #003366; text-decoration: none; }}
+        .timestamp {{ color: #888; font-size: 12px; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Nueva Oportunidad de Pasantía</h1>
+            <p>Facultad de Derecho - Universidad de Buenos Aires</p>
+        </div>
+        <div class="content">"""
         
         # Add offers
         for offer in offers:
             html_content += f"""
-                <div class="offer">
-                    <div class="offer-title">📋 Búsqueda N° {offer.get('numero_busqueda', 'N/A')}</div>
-                    <div class="offer-detail">
-                        <span class="label">📅 Fecha de Publicación:</span>
-                        <span class="value">{offer.get('fecha_publicacion', 'No especificada')}</span>
-                    </div>
-                    <div class="offer-detail">
-                        <span class="label">🏢 Área:</span>
-                        <span class="value">{offer.get('area', 'No especificada')}</span>
-                    </div>
-                    <div class="offer-detail">
-                        <span class="label">🕐 Horario:</span>
-                        <span class="value">{offer.get('horario', 'No especificado')}</span>
-                    </div>
-                    <div class="offer-detail">
-                        <span class="label">💰 Asignación Estímulo:</span>
-                        <span class="value">${offer.get('asignacion_estimulo', 'No especificada')}</span>
-                    </div>
-            """
+            <div class="offer">
+                <div class="offer-title">Búsqueda N° {offer.get('numero_busqueda', 'N/A')}</div>
+                <div class="offer-detail">
+                    <span class="label">Fecha de Publicación:</span>
+                    <span class="value">{offer.get('fecha_publicacion', 'No especificada')}</span>
+                </div>
+                <div class="offer-detail">
+                    <span class="label">Área:</span>
+                    <span class="value">{offer.get('area', 'No especificada')}</span>
+                </div>
+                <div class="offer-detail">
+                    <span class="label">Horario:</span>
+                    <span class="value">{offer.get('horario', 'No especificado')}</span>
+                </div>
+                <div class="offer-detail">
+                    <span class="label">Asignación Estímulo:</span>
+                    <span class="value">${offer.get('asignacion_estimulo', 'No especificada')}</span>
+                </div>"""
             
             # Add contact email if available
             if offer.get('contacto_email'):
                 html_content += f"""
-                    <div class="offer-detail">
-                        <span class="label">📧 Email de Contacto:</span>
-                        <a href="mailto:{offer['contacto_email']}" class="email-link">{offer['contacto_email']}</a>
-                    </div>
-                """
+                <div class="offer-detail">
+                    <span class="label">Email de Contacto:</span>
+                    <a href="mailto:{offer['contacto_email']}?subject=Postulación Búsqueda N° {offer.get('numero_busqueda', '')}" class="email-button">Enviar CV a {offer['contacto_email']}</a>
+                </div>"""
             else:
                 html_content += """
-                    <div class="warning">
-                        ⏰ <strong>Nota:</strong> El email de contacto se publica automáticamente 24 horas después de la oferta.
-                        Revisa la página web para obtener la información de contacto actualizada.
-                    </div>
-                """
+                <div class="info-box">
+                    <strong>Información importante:</strong> El email de contacto se publica automáticamente 24 horas después de la oferta.
+                    Revisa la página web para obtener la información de contacto actualizada.
+                </div>"""
             
             # Add more info link if available
             if offer.get('mas_informacion_url'):
                 html_content += f"""
-                    <div class="offer-detail">
-                        <a href="{offer['mas_informacion_url']}" class="email-link">🔗 Ver Más Información</a>
-                    </div>
-                """
-            
+                <div class="offer-detail">
+                    <a href="{offer['mas_informacion_url']}" target="_blank" style="color: #003366; text-decoration: underline;">Ver información completa de la oferta</a>
+                </div>"""
+                
             html_content += "</div>"
         
         html_content += f"""
-                <div class="footer">
-                    <p><strong>🔗 Enlace Original:</strong> <a href="https://www.derecho.uba.ar/academica/asuntos_estudiantiles/pasantias/ofertas.php">Página de Pasantías UBA</a></p>
-                    <p>📊 Este email fue generado automáticamente el {datetime.now().strftime('%d/%m/%Y a las %H:%M')}</p>
-                    <p>⚠️ <strong>Importante:</strong> La oficina de Pasantías no recepciona los CV ni forma parte del proceso de selección. Envía tu CV directamente al email de contacto de cada oferta.</p>
-                </div>
-            </div>
-        </body>
-        </html>
-        """
+        </div>
+        <div class="footer">
+            <p><strong>Enlace Original:</strong> <a href="https://www.derecho.uba.ar/academica/asuntos_estudiantiles/pasantias/ofertas.php" class="university-link">Página de Pasantías UBA Derecho</a></p>
+            <p class="timestamp">Este email fue generado automáticamente el {datetime.now().strftime('%d de %B de %Y a las %H:%M')}</p>
+            <p><strong>Importante:</strong> La oficina de Pasantías no recepciona los CV ni forma parte del proceso de selección. Envía tu CV directamente al email de contacto de cada oferta.</p>
+        </div>
+    </div>
+</body>
+</html>"""
         
         # Text Content (fallback)
         text_content = f"""
@@ -278,9 +281,15 @@ del proceso de selección. Envía tu CV directamente al email de contacto de cad
             else:
                 subject = f"🎯 {len(offers)} Nuevas Pasantías UBA Disponibles"
             
+            # Improved headers to avoid spam
             msg['Subject'] = subject
             msg['From'] = formataddr((email_settings['sender_name'], email_settings['sender_email']))
             msg['To'] = notification_settings['recipient_email']
+            msg['Reply-To'] = email_settings['sender_email']
+            msg['Message-ID'] = f"<{datetime.now().strftime('%Y%m%d%H%M%S')}.uba-pasantias@derecho.uba.ar>"
+            msg['Date'] = datetime.now().strftime('%a, %d %b %Y %H:%M:%S %z')
+            msg['X-Mailer'] = 'UBA Pasantías Monitor v1.0'
+            msg['X-Priority'] = '3'  # Normal priority
             
             # Attach text and HTML content
             text_part = MIMEText(text_content, 'plain', 'utf-8')
