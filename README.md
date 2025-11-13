@@ -1,15 +1,29 @@
-# 🎓 UBA Pasantías Monitor
+# 🤖 UBA Pasantías Monitor con IA
 
-Sistema automatizado para monitorear ofertas de pasantías de la Facultad de Derecho de la Universidad de Buenos Aires y recibir notificaciones por email cuando se publiquen nuevas ofertas.
+Sistema automatizado para monitorear ofertas de pasantías de la Facultad de Derecho de la Universidad de Buenos Aires con **Inteligencia Artificial integrada** para generar emails de aplicación personalizados y recibir notificaciones por email cuando se publiquen nuevas ofertas.
 
 ## 📋 Características
 
+### 🔍 Monitoreo Automatizado
 - ✅ **Monitoreo automático diario** de la página de pasantías de la UBA
 - 🔍 **Detección inteligente** de nuevas ofertas comparando con datos previos
-- 📧 **Notificaciones por email** con todos los detalles de las ofertas
-- ⚙️ **Configuración personalizable** para horarios y credenciales
+- ☁️ **Ejecución en la nube** 24/7 con GitHub Actions
 - 📊 **Logs detallados** de todas las actividades
-- 🔄 **Ejecución manual** para pruebas inmediatas
+
+### 🤖 Inteligencia Artificial Integrada
+- 🧠 **Emails de aplicación personalizados** generados con OpenAI GPT-4o-mini
+- 🎯 **Análisis automático** de cada oferta para adaptar el contenido
+- 👤 **Perfil profesional integrado** basado en tu CV
+- 👀 **Vista previa** del contenido generado por IA
+- 🔄 **Modo degradado** con templates inteligentes sin API key
+
+### 📧 Sistema de Notificaciones Avanzado
+- 📧 **Notificaciones por email** con diseño HTML profesional
+- 🎨 **Botones de aplicación inteligentes**:
+  - 🤖 **Aplicar con IA**: Email personalizado completo
+  - 📧 **Email Simple**: Plantilla básica
+- 🛡️ **Prevención de spam** con headers profesionales
+- ⚙️ **Configuración personalizable** para horarios y credenciales
 
 ## 🛠️ Instalación y Configuración
 

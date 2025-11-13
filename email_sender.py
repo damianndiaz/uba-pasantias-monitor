@@ -15,6 +15,7 @@ import os
 import logging
 from typing import List, Dict, Optional
 from datetime import datetime
+from ai_agent import AIJobApplicationAgent
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -26,6 +27,7 @@ class EmailSender:
         """Initialize with configuration file"""
         self.config_file = config_file
         self.config = self.load_config()
+        self.ai_agent = AIJobApplicationAgent()
         
     def load_config(self) -> Dict:
         """Load email configuration from file or environment variables"""

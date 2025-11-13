@@ -17,7 +17,7 @@ from typing import Optional
 
 # Import our custom modules
 from scraper import PasantiasWebScraper
-from email_sender import EmailSender
+from email_sender_ai import AIEmailSender
 
 # Configure logging
 logging.basicConfig(
@@ -37,7 +37,7 @@ class PasantiasMonitor:
         """Initialize the monitor"""
         self.config_file = config_file
         self.scraper = PasantiasWebScraper()
-        self.email_sender = EmailSender(config_file)
+        self.email_sender = AIEmailSender(config_file)
         self.running = True
         
         # Setup signal handlers for graceful shutdown
