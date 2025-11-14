@@ -121,10 +121,10 @@ class AIEmailSender:
         
         return True
     
-    def create_ai_enhanced_offer_html(self, offer: Dict[str, str]) -> str:
+    def create_ai_enhanced_offer_html(self, offer: Dict[str, str], user_id: str = "damian") -> str:
         """Create HTML content for a single offer with AI enhancement"""
-        # Generate AI-powered email content
-        ai_content = self.ai_agent.generate_personalized_email(offer)
+        # Generate AI-powered email content for specific user
+        ai_content = self.ai_agent.generate_personalized_email(offer, user_id)
         
         # Extract email components for mailto link
         ai_subject = ai_content.get('subject', f"Consulta sobre pasantía - {offer.get('numero_busqueda', offer.get('titulo', ''))}")
@@ -220,7 +220,7 @@ class AIEmailSender:
         </div>
         """
     
-    def create_enhanced_email_content(self, offers: List[Dict]) -> tuple[str, str]:
+    def create_enhanced_email_content(self, offers: List[Dict], user_id: str = "damian") -> tuple[str, str]:
         """Create enhanced HTML and text content for email notification with AI features"""
         
         # HTML content with modern styling
@@ -254,9 +254,9 @@ class AIEmailSender:
             <div class="ai-badge">🤖 Con Asistente de IA para Aplicaciones Personalizadas</div>
         """
         
-        # Add enhanced offers
+        # Add enhanced offers for specific user
         for offer in offers:
-            html_content += self.create_ai_enhanced_offer_html(offer)
+            html_content += self.create_ai_enhanced_offer_html(offer, user_id)
         
         # Footer
         html_content += f"""
@@ -318,8 +318,8 @@ del proceso de selección. Envía tu CV directamente al email de contacto de cad
         
         return html_content, text_content
     
-    def send_notification(self, offers: List[Dict]) -> bool:
-        """Send email notification for new offers with AI enhancements"""
+    def send_notifications_to_all_users(self, offers: List[Dict]) -> bool:
+        """Send email notifications to all users with personalized AI content"""
         
         if not offers:
             logger.info("No offers to send")
@@ -329,18 +329,37 @@ del proceso de selección. Envía tu CV directamente al email de contacto de cad
             logger.error("Invalid configuration, cannot send email")
             return False
         
+        # Get all user emails
+        user_emails = self.ai_agent.get_user_emails()
+        
+        all_success = True
+        for user_id, user_email in user_emails.items():
+            success = self.send_notification_to_user(offers, user_id, user_email)
+            if not success:
+                all_success = False
+        
+        return all_success
+    
+    def send_notification_to_user(self, offers: List[Dict], user_id: str, user_email: str) -> bool:
+        """Send email notification for new offers with AI enhancements to specific user"""
+        
+        if not offers:
+            logger.info("No offers to send")
+            return True
+        
         try:
             # Get email settings
             email_settings = self.config['email_settings']
             notification_settings = self.config['notification_settings']
             
-            # Create enhanced email content
-            html_content, text_content = self.create_enhanced_email_content(offers)
+            # Create enhanced email content for specific user
+            html_content, text_content = self.create_enhanced_email_content(offers, user_id)
             
             # Setup email message
             msg = MIMEMultipart('alternative')
             
-            # Subject
+            # Subject with user name
+            user_name = self.ai_agent.get_user_name(user_id)
             if len(offers) == 1:
                 offer_title = offers[0].get('numero_busqueda', offers[0].get('numero', offers[0].get('titulo', 'Nueva oferta')))
                 if 'subject_single' in notification_settings:
@@ -353,11 +372,11 @@ del proceso de selección. Envía tu CV directamente al email de contacto de cad
                 else:
                     subject = f"🎓 Nueva Pasantía UBA Detectada - {len(offers)} ofertas"
             
-            subject += " 🤖 (Con IA)"  # Add AI indicator to subject
+            subject += f" 🤖 (Para {user_name.split()[0]})"  # Add AI indicator with user name
             
             # Email headers
             msg['From'] = formataddr((email_settings['sender_name'], email_settings['sender_email']))
-            msg['To'] = notification_settings['recipient_email']
+            msg['To'] = user_email
             msg['Subject'] = subject
             
             # Anti-spam headers
@@ -410,7 +429,12 @@ del proceso de selección. Envía tu CV directamente al email de contacto de cad
         ]
         
         logger.info("Sending AI-enhanced test email")
-        return self.send_notification(test_offers)
+        return self.send_notifications_to_all_users(test_offers)
+    
+    def send_notification(self, offers: List[Dict]) -> bool:
+        """Legacy method - sends to all users for backwards compatibility"""
+        logger.info("Using legacy send_notification method - sending to all users")
+        return self.send_notifications_to_all_users(offers)
 
 if __name__ == "__main__":
     # Test the AI-enhanced email sender
@@ -431,7 +455,7 @@ if __name__ == "__main__":
     
     # Test email sending
     if sender.validate_config():
-        success = sender.send_notification(test_offers)
-        print(f"Test email sent: {success}")
+        success = sender.send_notifications_to_all_users(test_offers)
+        print(f"Test emails sent to all users: {success}")
     else:
         print("Configuration not valid - check config.json")

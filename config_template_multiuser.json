@@ -1,0 +1,39 @@
+{
+  "email_settings": {
+    "smtp_server": "smtp.gmail.com",
+    "smtp_port": 587,
+    "sender_email": "tu_email@gmail.com",
+    "sender_password": "tu_app_password_aqui",
+    "sender_name": "UBA Pasantías Monitor Multi-Usuario"
+  },
+  "notification_settings": {
+    "recipient_email": "legacy_recipient@gmail.com",
+    "_note": "recipient_email is now used only for legacy compatibility. Multi-user system sends to all configured users.",
+    "subject_template": "🎓 Nueva Pasantía UBA Detectada - {total} ofertas",
+    "subject_single": "🎓 Nueva Pasantía UBA: {titulo}"
+  },
+  "openai_settings": {
+    "api_key": "tu_openai_api_key_aqui",
+    "_note": "OpenAI API key for AI-powered personalized emails"
+  },
+  "multi_user_info": {
+    "_description": "The system now supports multiple users with personalized AI content",
+    "_users_configured": [
+      {
+        "user_id": "damian",
+        "email": "diazzdamian00@gmail.com",
+        "description": "Student with paralegal experience and university teaching assistant role"
+      },
+      {
+        "user_id": "valentin", 
+        "email": "valdom152@gmail.com",
+        "description": "Student with banking experience and economics/administration background"
+      }
+    ],
+    "_usage": {
+      "automatic": "scheduler.py automatically sends to all users",
+      "manual_all": "email_sender.send_notifications_to_all_users(offers)",
+      "manual_specific": "email_sender.send_notification_to_user(offers, user_id, user_email)"
+    }
+  }
+}
