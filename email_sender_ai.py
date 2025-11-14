@@ -400,9 +400,9 @@ del proceso de selección. Envía tu CV directamente al email de contacto de cad
                 server.login(email_settings['sender_email'], email_settings['sender_password'])
                 
                 text = msg.as_string()
-                server.sendmail(email_settings['sender_email'], notification_settings['recipient_email'], text)
+                server.sendmail(email_settings['sender_email'], user_email, text)
             
-            logger.info(f"AI-enhanced notification email sent successfully to {notification_settings['recipient_email']} for {len(offers)} offers")
+            logger.info(f"AI-enhanced notification email sent successfully to {user_email} for {len(offers)} offers")
             return True
             
         except Exception as e:
