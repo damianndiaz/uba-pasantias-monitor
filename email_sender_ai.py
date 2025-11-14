@@ -127,7 +127,7 @@ class AIEmailSender:
         ai_content = self.ai_agent.generate_personalized_email(offer)
         
         # Extract email components for mailto link
-        ai_subject = ai_content.get('subject', f"Consulta sobre pasantía - {offer.get('numero', offer.get('titulo', ''))}")
+        ai_subject = ai_content.get('subject', f"Consulta sobre pasantía - {offer.get('numero_busqueda', offer.get('titulo', ''))}")
         ai_body = ai_content.get('body', f"Estimados,\n\nMe dirijo a ustedes para expresar mi interés en la pasantía.")
         
         # URL encode the email content for mailto link
@@ -138,7 +138,7 @@ class AIEmailSender:
         preview_body = ai_body[:200] + "..." if len(ai_body) > 200 else ai_body
         
         contact_email = offer.get('contacto_email', offer.get('contacto', ''))
-        offer_title = offer.get('numero', offer.get('numero_busqueda', offer.get('titulo', 'Sin título')))
+        offer_title = offer.get('numero_busqueda', offer.get('numero', offer.get('titulo', 'Sin título')))
         
         return f"""
         <div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
@@ -148,8 +148,7 @@ class AIEmailSender:
             
             <div style="margin-bottom: 15px;">
                 <p><strong>📅 Fecha de publicación:</strong> {offer.get('fecha_publicacion', offer.get('fecha', 'No especificada'))}</p>
-                <p><strong>🏢 Empresa:</strong> {offer.get('empresa', offer.get('area', 'No especificada'))}</p>
-                <p><strong>🎯 Área:</strong> {offer.get('area', 'No especificada')}</p>
+                <p><strong>🏢 Empresa:</strong> {offer.get('area', 'No especificada')}</p>
                 <p><strong>🕒 Horario:</strong> {offer.get('horario', 'No especificado')}</p>
                 <p><strong>💰 Asignación Estímulo:</strong> ${offer.get('asignacion_estimulo', offer.get('remuneracion', 'No especificada'))}</p>
                 <p><strong>📍 Lugar:</strong> {offer.get('lugar', 'No especificado')}</p>
